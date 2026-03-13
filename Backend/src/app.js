@@ -8,6 +8,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const authRoutes = require("./routes/auth.routes");
 const resourceRoutes = require("./routes/resource.routes");
 const errorHandler = require("./middleware/error-handler");
+const connectDB = require("./config/db");
 
 const app = express();
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:3000")
@@ -54,6 +55,14 @@ app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 app.use(mongoSanitize());
 app.use(morgan("dev"));
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,

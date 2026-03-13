@@ -26,6 +26,10 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  res.send("GoalTrackr API is live");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "GoalTrackr API healthy" });
 });

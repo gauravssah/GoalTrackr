@@ -308,12 +308,12 @@ export default function TasksPage() {
           </Card>
 
           <Card className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold">Today quick preview</h2>
                 <p className="text-sm text-foreground/60">A dedicated route is available for viewing today&apos;s tasks and progress.</p>
               </div>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
                 <Link href="/tasks/today">Open full today page</Link>
               </Button>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { AxiosResponse } from "axios";
 import api from "@/lib/api";
 import { BlogEntry, DailySurvey, Goal, JobApplication, Task, User } from "@/types";
 import { useToastStore } from "@/store/use-toast-store";
@@ -69,10 +70,10 @@ const setStoredToken = (token: string | null) => {
   }
 };
 
-const cleanPayload = <T extends Record<string, unknown>>(payload: T) =>
-  Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== "" && value !== undefined)) as T;
+const cleanPayload = <T extends object>(payload: T) =>
+  Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== "" && value !== undefined)) as Partial<T>;
 
-async function safeRequest<T>(request: Promise<{ data: T }>) {
+async function safeRequest<T = any>(request: Promise<AxiosResponse<T>>) {
   const response = await request;
   return response.data;
 }

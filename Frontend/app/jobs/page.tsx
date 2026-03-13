@@ -9,9 +9,9 @@ import { FieldGroup } from "@/components/ui/field-group";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/store/use-app-store";
-import { JobApplication } from "@/types";
+import { JobApplication, JobStatus } from "@/types";
 
-const emptyJob = {
+const emptyJob: Omit<JobApplication, "_id"> = {
   companyName: "",
   jobRole: "",
   jobLink: "",
@@ -77,7 +77,7 @@ export default function JobsPage() {
               <Input type="date" value={form.followUpReminder} onChange={(e) => setForm({ ...form, followUpReminder: e.target.value })} />
             </FieldGroup>
             <FieldGroup label="Application status">
-              <select className="h-11 w-full rounded-xl border bg-card px-4" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+              <select className="h-11 w-full rounded-xl border bg-card px-4" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as JobStatus })}>
                 <option>Applied</option>
                 <option>Interview</option>
                 <option>Rejected</option>

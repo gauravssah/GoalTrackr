@@ -24,7 +24,8 @@ export const mockTasks: Task[] = [
     status: "In Progress",
     distractionCount: 1,
     notes: "Focus on caching and queues.",
-    createdAt: "2026-03-13T06:00:00.000Z"
+    createdAt: "2026-03-13T06:00:00.000Z",
+    timeEntries: []
   },
   {
     _id: "t2",
@@ -36,7 +37,8 @@ export const mockTasks: Task[] = [
     tags: ["product", "ops"],
     status: "Pending",
     distractionCount: 0,
-    createdAt: "2026-03-13T08:30:00.000Z"
+    createdAt: "2026-03-13T08:30:00.000Z",
+    timeEntries: []
   },
   {
     _id: "t3",
@@ -51,7 +53,8 @@ export const mockTasks: Task[] = [
     distractionCount: 2,
     notes: "Strong momentum after lunch.",
     createdAt: "2026-03-13T07:00:00.000Z",
-    completedAt: "2026-03-13T18:40:00.000Z"
+    completedAt: "2026-03-13T18:40:00.000Z",
+    timeEntries: []
   }
 ];
 

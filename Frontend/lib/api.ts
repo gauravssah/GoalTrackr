@@ -20,7 +20,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error?.response?.data?.message || "Request failed";
+    const message =
+      error?.response?.data?.message ||
+      (error?.request ? "Network error or CORS blocked request" : "Request failed");
     return Promise.reject(new Error(message));
   }
 );

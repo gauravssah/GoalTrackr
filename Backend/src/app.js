@@ -10,9 +10,24 @@ const resourceRoutes = require("./routes/resource.routes");
 const errorHandler = require("./middleware/error-handler");
 
 const app = express();
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    },
+    credentials: true
+  })
+);
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 app.use(mongoSanitize());

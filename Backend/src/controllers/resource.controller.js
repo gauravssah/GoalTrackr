@@ -5,6 +5,7 @@ const JobApplication = require("../models/job-application.model");
 const Blog = require("../models/blog.model");
 const DailySurvey = require("../models/daily-survey.model");
 const ProductivityStats = require("../models/productivity-stats.model");
+const Reflection = require("../models/reflection.model");
 const catchAsync = require("../utils/catch-async");
 const { buildQuery } = require("../utils/api-features");
 const { getDashboardAnalytics } = require("../services/analytics.service");
@@ -66,6 +67,7 @@ const goalCrud = createCrudController(Goal, "goals");
 const jobCrud = createCrudController(JobApplication, "jobs");
 const blogCrud = createCrudController(Blog, "blogs");
 const surveyCrud = createCrudController(DailySurvey, "surveys");
+const reflectionCrud = createCrudController(Reflection, "reflections");
 
 exports.createTask = taskCrud.create;
 exports.listTasks = taskCrud.list;
@@ -91,6 +93,11 @@ exports.createSurvey = surveyCrud.create;
 exports.listSurveys = surveyCrud.list;
 exports.updateSurvey = surveyCrud.update;
 exports.deleteSurvey = surveyCrud.remove;
+
+exports.createReflection = reflectionCrud.create;
+exports.listReflections = reflectionCrud.list;
+exports.updateReflection = reflectionCrud.update;
+exports.deleteReflection = reflectionCrud.remove;
 
 exports.getStats = catchAsync(async (req, res) => {
   const analytics = await getDashboardAnalytics(req.user._id);

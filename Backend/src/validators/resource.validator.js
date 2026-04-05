@@ -13,12 +13,18 @@ const taskSchema = z.object({
     title: z.string().min(1),
     description: z.string().optional(),
     priority: z.enum(["High", "Medium", "Low"]).optional(),
+    scheduledDate: z.string().optional(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+    slotStartMinutes: z.number().min(0).max(1439).optional(),
+    slotEndMinutes: z.number().min(1).max(1440).optional(),
     sequence: z.number().min(0).optional(),
     deadline: z.string().optional(),
     estimatedTime: z.number().optional(),
     tags: z.array(z.string()).optional(),
     status: z.enum(["Pending", "In Progress", "Completed"]).optional(),
-    satisfactionLevel: z.number().min(1).max(10).optional(),
+    completionStatus: z.enum(["Completed", "Partially Completed", "Not Completed", "Pending"]).optional(),
+    satisfactionLevel: z.number().min(0).max(10).optional(),
     distractionCount: z.number().min(0).optional(),
     notes: z.string().optional(),
     actualTimeSpentSeconds: z.number().min(0).optional(),
@@ -41,8 +47,10 @@ const goalSchema = z.object({
     title: z.string().min(1),
     description: z.string().optional(),
     period: z.enum(["Daily", "Weekly", "Monthly", "Yearly"]),
+    status: z.enum(["Completed", "Partially Completed", "Not Completed", "Pending"]).optional(),
     targetValue: z.number().positive(),
     currentValue: z.number().min(0).optional(),
+    satisfactionScore: z.number().min(1).max(10).optional(),
     dueDate: z.string().optional(),
     completed: z.boolean().optional()
   }),
@@ -90,11 +98,21 @@ const surveySchema = z.object({
   params: z.object({}).optional()
 });
 
+const reflectionSchema = z.object({
+  body: z.object({
+    date: z.string(),
+    answers: z.array(z.string().min(1)).length(5)
+  }),
+  query: z.object({}).optional(),
+  params: z.object({}).optional()
+});
+
 module.exports = {
   objectIdParam,
   taskSchema,
   goalSchema,
   jobSchema,
   blogSchema,
-  surveySchema
+  surveySchema,
+  reflectionSchema
 };

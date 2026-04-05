@@ -3,7 +3,15 @@
 import { create } from "zustand";
 import type { AxiosResponse } from "axios";
 import api from "@/lib/api";
-import { BlogEntry, DailySurvey, Goal, JobApplication, Task, User } from "@/types";
+import {
+  BlogEntry,
+  DailySurvey,
+  Goal,
+  JobApplication,
+  Reflection,
+  Task,
+  User,
+} from "@/types";
 import { useToastStore } from "@/store/use-toast-store";
 
 type SearchResults = {
@@ -33,6 +41,7 @@ interface AppState {
   jobs: JobApplication[];
   blogs: BlogEntry[];
   surveys: DailySurvey[];
+  reflections: Reflection[];
   token: string | null;
   loading: boolean;
   bootstrapped: boolean;
@@ -55,8 +64,12 @@ interface AppState {
   updateJob: (id: string, payload: Partial<JobApplication>) => Promise<void>;
   deleteJob: (id: string) => Promise<void>;
   createBlog: (payload: Partial<BlogEntry>) => Promise<void>;
+  updateBlog: (id: string, payload: Partial<BlogEntry>) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
   createSurvey: (payload: Partial<DailySurvey>) => Promise<void>;
+  createReflection: (payload: Partial<Reflection>) => Promise<void>;
+  updateReflection: (id: string, payload: Partial<Reflection>) => Promise<void>;
+  deleteReflection: (id: string) => Promise<void>;
   searchAll: (query: string) => Promise<void>;
   clearError: () => void;
 }
@@ -71,14 +84,22 @@ const setStoredToken = (token: string | null) => {
 };
 
 const cleanPayload = <T extends object>(payload: T) =>
-  Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== "" && value !== undefined)) as Partial<T>;
+  Object.fromEntries(
+    Object.entries(payload).filter(
+      ([, value]) => value !== "" && value !== undefined,
+    ),
+  ) as Partial<T>;
 
 async function safeRequest<T = any>(request: Promise<AxiosResponse<T>>) {
   const response = await request;
   return response.data;
 }
 
-function notify(title: string, tone: "success" | "error" | "info", description?: string) {
+function notify(
+  title: string,
+  tone: "success" | "error" | "info",
+  description?: string,
+) {
   useToastStore.getState().pushToast({ title, tone, description });
 }
 
@@ -98,6 +119,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   jobs: [],
   blogs: [],
   surveys: [],
+  reflections: [],
   token: null,
   loading: false,
   bootstrapped: false,
@@ -105,11 +127,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   searchResults: {
     tasks: [],
     blogs: [],
-    jobs: []
+    jobs: [],
   },
   clearError: () => set({ error: null }),
   initializeApp: async () => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("goaltrackr_token") : null;
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("goaltrackr_token")
+        : null;
     if (!token) {
       set({ bootstrapped: true, token: null, user: null });
       return;
@@ -122,7 +147,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       await get().fetchAllData();
     } catch (error) {
       setStoredToken(null);
-      set({ token: null, user: null, error: "Session expired. Please login again." });
+      set({
+        token: null,
+        user: null,
+        error: "Session expired. Please login again.",
+      });
       notify("Session expired", "error", "Please login again to continue.");
     } finally {
       set({ loading: false, bootstrapped: true });
@@ -135,12 +164,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   fetchAllData: async () => {
     set({ loading: true, error: null });
     try {
-      const [tasksRes, goalsRes, jobsRes, blogsRes, surveysRes] = await Promise.all([
+      const [
+        tasksRes,
+        goalsRes,
+        jobsRes,
+        blogsRes,
+        surveysRes,
+        reflectionsRes,
+      ] = await Promise.all([
         safeRequest(api.get("/tasks?limit=100")),
         safeRequest(api.get("/goals?limit=100")),
         safeRequest(api.get("/jobs?limit=100")),
         safeRequest(api.get("/blogs?limit=100")),
-        safeRequest(api.get("/surveys?limit=100"))
+        safeRequest(api.get("/surveys?limit=100")),
+        safeRequest(api.get("/reflections?limit=100")),
       ]);
 
       set({
@@ -148,10 +185,13 @@ export const useAppStore = create<AppState>((set, get) => ({
         goals: goalsRes.data,
         jobs: jobsRes.data,
         blogs: blogsRes.data,
-        surveys: surveysRes.data
+        surveys: surveysRes.data,
+        reflections: reflectionsRes.data,
       });
     } catch (error: unknown) {
-      set({ error: error instanceof Error ? error.message : "Failed to load data." });
+      set({
+        error: error instanceof Error ? error.message : "Failed to load data.",
+      });
       throw error;
     } finally {
       set({ loading: false });
@@ -203,18 +243,26 @@ export const useAppStore = create<AppState>((set, get) => ({
       jobs: [],
       blogs: [],
       surveys: [],
-      bootstrapped: true
+      reflections: [],
+      bootstrapped: true,
     });
     notify("Logged out", "info", "See you next time.");
   },
   updateProfile: async (payload) => {
     set({ loading: true, error: null });
     try {
-      const response = await safeRequest(api.patch("/auth/profile", cleanPayload(payload)));
+      const response = await safeRequest(
+        api.patch("/auth/profile", cleanPayload(payload)),
+      );
       set({ user: response.data.user });
-      notify("Profile updated", "success", "Your latest profile changes were saved.");
+      notify(
+        "Profile updated",
+        "success",
+        "Your latest profile changes were saved.",
+      );
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Profile update failed.";
+      const message =
+        error instanceof Error ? error.message : "Profile update failed.";
       set({ error: message });
       notify("Profile update failed", "error", message);
     } finally {
@@ -222,12 +270,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
   createTask: async (payload) => {
-    const response = await safeRequest(api.post("/tasks", cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.post("/tasks", cleanPayload(payload as Record<string, unknown>)),
+    );
     set((state) => ({ tasks: upsertById(state.tasks, response.data) }));
     notify("Task created", "success", "Your new task was saved.");
   },
   updateTask: async (id, payload) => {
-    const response = await safeRequest(api.patch(`/tasks/${id}`, cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.patch(
+        `/tasks/${id}`,
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
     set((state) => ({ tasks: upsertById(state.tasks, response.data) }));
     notify("Task updated", "success", "Task changes saved successfully.");
   },
@@ -237,12 +292,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     notify("Task deleted", "info", "The task was removed.");
   },
   createGoal: async (payload) => {
-    const response = await safeRequest(api.post("/goals", cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.post("/goals", cleanPayload(payload as Record<string, unknown>)),
+    );
     set((state) => ({ goals: upsertById(state.goals, response.data) }));
     notify("Plan created", "success", "Your planning block was saved.");
   },
   updateGoal: async (id, payload) => {
-    const response = await safeRequest(api.patch(`/goals/${id}`, cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.patch(
+        `/goals/${id}`,
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
     set((state) => ({ goals: upsertById(state.goals, response.data) }));
     notify("Plan updated", "success", "Progress was updated.");
   },
@@ -252,12 +314,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     notify("Plan deleted", "info", "The plan was removed.");
   },
   createJob: async (payload) => {
-    const response = await safeRequest(api.post("/jobs", cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.post("/jobs", cleanPayload(payload as Record<string, unknown>)),
+    );
     set((state) => ({ jobs: upsertById(state.jobs, response.data) }));
     notify("Application saved", "success", "Job application added.");
   },
   updateJob: async (id, payload) => {
-    const response = await safeRequest(api.patch(`/jobs/${id}`, cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.patch(
+        `/jobs/${id}`,
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
     set((state) => ({ jobs: upsertById(state.jobs, response.data) }));
     notify("Application updated", "success", "Job application updated.");
   },
@@ -267,9 +336,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     notify("Application deleted", "info", "Job application removed.");
   },
   createBlog: async (payload) => {
-    const response = await safeRequest(api.post("/blogs", cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.post("/blogs", cleanPayload(payload as Record<string, unknown>)),
+    );
     set((state) => ({ blogs: upsertById(state.blogs, response.data) }));
     notify("Journal saved", "success", "Reflection added to your timeline.");
+  },
+  updateBlog: async (id, payload) => {
+    const response = await safeRequest(
+      api.patch(
+        `/blogs/${id}`,
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
+    set((state) => ({ blogs: upsertById(state.blogs, response.data) }));
+    notify("Journal updated", "success", "Your entry was updated.");
   },
   deleteBlog: async (id) => {
     await api.delete(`/blogs/${id}`);
@@ -277,16 +358,51 @@ export const useAppStore = create<AppState>((set, get) => ({
     notify("Journal deleted", "info", "Entry removed.");
   },
   createSurvey: async (payload) => {
-    const response = await safeRequest(api.post("/surveys", cleanPayload(payload as Record<string, unknown>)));
+    const response = await safeRequest(
+      api.post("/surveys", cleanPayload(payload as Record<string, unknown>)),
+    );
     set((state) => ({ surveys: upsertById(state.surveys, response.data) }));
     notify("Survey saved", "success", "Your day review has been stored.");
+  },
+  createReflection: async (payload) => {
+    const response = await safeRequest(
+      api.post(
+        "/reflections",
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
+    set((state) => ({
+      reflections: upsertById(state.reflections, response.data),
+    }));
+    notify("Reflection saved", "success", "Daily answers stored.");
+  },
+  updateReflection: async (id, payload) => {
+    const response = await safeRequest(
+      api.patch(
+        `/reflections/${id}`,
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
+    set((state) => ({
+      reflections: upsertById(state.reflections, response.data),
+    }));
+    notify("Reflection updated", "success", "Your reflection was updated.");
+  },
+  deleteReflection: async (id) => {
+    await api.delete(`/reflections/${id}`);
+    set((state) => ({
+      reflections: state.reflections.filter((entry) => entry._id !== id),
+    }));
+    notify("Reflection deleted", "info", "Reflection removed.");
   },
   searchAll: async (query) => {
     if (!query.trim()) {
       set({ searchResults: { tasks: [], blogs: [], jobs: [] } });
       return;
     }
-    const response = await safeRequest(api.get(`/search?q=${encodeURIComponent(query)}`));
+    const response = await safeRequest(
+      api.get(`/search?q=${encodeURIComponent(query)}`),
+    );
     set({ searchResults: response.data });
-  }
+  },
 }));

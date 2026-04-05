@@ -1,6 +1,16 @@
 export type Priority = "High" | "Medium" | "Low";
 export type TaskStatus = "Pending" | "In Progress" | "Completed";
 export type JobStatus = "Applied" | "Interview" | "Rejected" | "Offer";
+export type CompletionStatus =
+  | "Completed"
+  | "Partially Completed"
+  | "Not Completed"
+  | "Pending";
+export type GoalStatus =
+  | "Completed"
+  | "Partially Completed"
+  | "Not Completed"
+  | "Pending";
 
 export interface User {
   _id: string;
@@ -19,11 +29,17 @@ export interface Task {
   title: string;
   description: string;
   priority: Priority;
+  scheduledDate?: string;
+  startTime?: string;
+  endTime?: string;
+  slotStartMinutes?: number;
+  slotEndMinutes?: number;
   sequence?: number;
   deadline: string;
   estimatedTime: number;
   tags: string[];
   status: TaskStatus;
+  completionStatus?: CompletionStatus;
   satisfactionLevel?: number;
   distractionCount: number;
   notes?: string;
@@ -44,8 +60,10 @@ export interface Goal {
   title: string;
   description: string;
   period: "Daily" | "Weekly" | "Monthly" | "Yearly";
+  status?: GoalStatus;
   targetValue: number;
   currentValue: number;
+  satisfactionScore?: number;
   dueDate: string;
   completed: boolean;
 }
@@ -81,13 +99,23 @@ export interface DailySurvey {
   date: string;
 }
 
+export interface Reflection {
+  _id: string;
+  date: string;
+  answers: string[];
+}
+
 export interface ProductivityStats {
   completedToday: number;
   pendingTasks: number;
   focusScore: number;
   distractionsToday: number;
   weeklyProgress: number;
-  dailyProductivity: Array<{ date: string; completed: number; planned: number }>;
+  dailyProductivity: Array<{
+    date: string;
+    completed: number;
+    planned: number;
+  }>;
   weeklyProgressChart: Array<{ week: string; completed: number }>;
   priorityDistribution: Array<{ name: string; value: number }>;
   yearlyTrend: Array<{ month: string; productivity: number }>;

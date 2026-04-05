@@ -2,7 +2,7 @@
 
 GoalTrackr is a full-stack productivity and life-planning web app for managing daily tasks, multi-level goals, job applications, journals, search, and profile tracking in one workspace.
 
-Live app: `https://goaltrackr-theta.vercel.app`
+Live app: https://goaltrackr-theta.vercel.app
 
 ## Overview
 

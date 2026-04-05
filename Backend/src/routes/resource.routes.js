@@ -2,7 +2,7 @@ const express = require("express");
 const controller = require("../controllers/resource.controller");
 const validate = require("../middleware/validate");
 const { protect } = require("../middleware/auth");
-const { objectIdParam, taskSchema, goalSchema, jobSchema, blogSchema, surveySchema } = require("../validators/resource.validator");
+const { objectIdParam, taskSchema, goalSchema, jobSchema, blogSchema, surveySchema, reflectionSchema } = require("../validators/resource.validator");
 
 const router = express.Router();
 
@@ -32,6 +32,11 @@ router.get("/surveys", controller.listSurveys);
 router.post("/surveys", validate(surveySchema), controller.createSurvey);
 router.patch("/surveys/:id", validate(objectIdParam), controller.updateSurvey);
 router.delete("/surveys/:id", validate(objectIdParam), controller.deleteSurvey);
+
+router.get("/reflections", controller.listReflections);
+router.post("/reflections", validate(reflectionSchema), controller.createReflection);
+router.patch("/reflections/:id", validate(objectIdParam), controller.updateReflection);
+router.delete("/reflections/:id", validate(objectIdParam), controller.deleteReflection);
 
 router.get("/stats", controller.getStats);
 router.get("/search", controller.globalSearch);

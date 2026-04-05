@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,109 +9,191 @@ import { FieldGroup } from "@/components/ui/field-group";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/store/use-app-store";
-import { formatDate } from "@/lib/utils";
 
 export default function JournalPage() {
   const blogs = useAppStore((state) => state.blogs);
-  const surveys = useAppStore((state) => state.surveys);
   const createBlog = useAppStore((state) => state.createBlog);
+  const updateBlog = useAppStore((state) => state.updateBlog);
   const deleteBlog = useAppStore((state) => state.deleteBlog);
-  const createSurvey = useAppStore((state) => state.createSurvey);
 
-  const [blog, setBlog] = useState({ title: "", content: "", mood: "", tags: "" });
-  const [survey, setSurvey] = useState({
-    productiveRating: 7,
-    satisfactionRating: 7,
-    biggestDistraction: "",
-    learnedToday: "",
-    improveTomorrow: ""
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+    mood: "",
+    tags: "",
   });
+
+  const history = useMemo(
+    () =>
+      [...blogs].sort(
+        (left, right) =>
+          new Date(right.date).getTime() - new Date(left.date).getTime(),
+      ),
+    [blogs],
+  );
+
+  async function saveEntry() {
+    const payload = {
+      title: form.title.trim(),
+      content: form.content.trim(),
+      mood: form.mood.trim() || "Neutral",
+      tags: form.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      date: new Date().toISOString(),
+    };
+
+    if (editingId) {
+      await updateBlog(editingId, payload);
+    } else {
+      await createBlog(payload);
+    }
+
+    setEditingId(null);
+    setForm({ title: "", content: "", mood: "", tags: "" });
+  }
+
+  function editEntry(id: string) {
+    const entry = blogs.find((item) => item._id === id);
+    if (!entry) return;
+
+    setEditingId(id);
+    setForm({
+      title: entry.title,
+      content: entry.content,
+      mood: entry.mood,
+      tags: entry.tags.join(", "),
+    });
+  }
 
   return (
     <AppShell>
-      <div className="grid gap-5 xl:grid-cols-2">
-        <Card className="space-y-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold">Daily blog / journal</h1>
-              <p className="text-sm text-foreground/60">Write section yahin rakha gaya hai, aur entries me date clearly show hogi.</p>
-            </div>
-            <Badge>{formatDate(new Date())}</Badge>
+      <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+        <Card className="space-y-4 border-primary/15 bg-gradient-to-br from-primary/10 via-card to-card">
+          <div>
+            <p className="text-xs uppercase tracking-[0.28em] text-foreground/45">
+              Daily journal
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">
+              Write, revisit, and refine your day.
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm text-foreground/65">
+              Every journal entry is date-stamped automatically and can be
+              edited or deleted later.
+            </p>
           </div>
-          <FieldGroup label="Journal title">
-            <Input placeholder="Title" value={blog.title} onChange={(e) => setBlog({ ...blog, title: e.target.value })} />
+
+          <FieldGroup label="Title">
+            <Input
+              value={form.title}
+              onChange={(event) =>
+                setForm({ ...form, title: event.target.value })
+              }
+              placeholder="Journal title"
+            />
           </FieldGroup>
           <FieldGroup label="Mood">
-            <Input placeholder="Mood" value={blog.mood} onChange={(e) => setBlog({ ...blog, mood: e.target.value })} />
+            <Input
+              value={form.mood}
+              onChange={(event) =>
+                setForm({ ...form, mood: event.target.value })
+              }
+              placeholder="Calm, focused, tired..."
+            />
           </FieldGroup>
-          <FieldGroup label="Tags" hint="Comma separated labels like focus, career.">
-            <Input placeholder="Tags: focus, career" value={blog.tags} onChange={(e) => setBlog({ ...blog, tags: e.target.value })} />
+          <FieldGroup
+            label="Tags"
+            hint="Comma-separated labels like focus, growth, health."
+          >
+            <Input
+              value={form.tags}
+              onChange={(event) =>
+                setForm({ ...form, tags: event.target.value })
+              }
+              placeholder="focus, growth"
+            />
           </FieldGroup>
-          <FieldGroup label="Reflection">
-            <Textarea placeholder="Write your reflection" value={blog.content} onChange={(e) => setBlog({ ...blog, content: e.target.value })} />
+          <FieldGroup label="Entry">
+            <Textarea
+              value={form.content}
+              onChange={(event) =>
+                setForm({ ...form, content: event.target.value })
+              }
+              placeholder="What happened today?"
+            />
           </FieldGroup>
-          <Button onClick={async () => {
-            await createBlog({ ...blog, tags: blog.tags.split(",").map((tag) => tag.trim()).filter(Boolean), date: new Date().toISOString() });
-            setBlog({ title: "", content: "", mood: "", tags: "" });
-          }}>Save journal</Button>
 
-          <div className="space-y-3">
-            {blogs.map((entry) => (
-              <div key={entry._id} className="rounded-2xl border border-border p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <div>
-                    <h2 className="font-semibold">{entry.title}</h2>
-                    <p className="mt-1 text-xs text-foreground/55">{formatDate(entry.date)}</p>
-                  </div>
-                  <Badge>{entry.mood}</Badge>
-                </div>
-                <p className="text-sm text-foreground/70">{entry.content}</p>
-                <Button className="mt-3" variant="outline" size="sm" onClick={() => deleteBlog(entry._id)}>Delete</Button>
-              </div>
-            ))}
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={saveEntry}>
+              {editingId ? "Update journal" : "Save journal"}
+            </Button>
+            {editingId ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditingId(null);
+                  setForm({ title: "", content: "", mood: "", tags: "" });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
           </div>
         </Card>
 
         <Card className="space-y-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold">End of day productivity survey</h1>
-              <p className="text-sm text-foreground/60">Survey cards me ab date bhi show hogi taaki day identify karna easy ho.</p>
-            </div>
-            <Badge>{formatDate(new Date())}</Badge>
+          <div>
+            <p className="text-xs uppercase tracking-[0.28em] text-foreground/45">
+              History
+            </p>
+            <h2 className="mt-2 text-lg font-semibold">Previous journals</h2>
           </div>
-          <FieldGroup label="Productivity rating" hint="Give your day a score from 1 to 10.">
-            <Input type="number" min={1} max={10} value={survey.productiveRating} onChange={(e) => setSurvey({ ...survey, productiveRating: Number(e.target.value) })} placeholder="How productive was your day?" />
-          </FieldGroup>
-          <FieldGroup label="Satisfaction rating" hint="How satisfied are you with today's outcome?">
-            <Input type="number" min={1} max={10} value={survey.satisfactionRating} onChange={(e) => setSurvey({ ...survey, satisfactionRating: Number(e.target.value) })} placeholder="How satisfied are you?" />
-          </FieldGroup>
-          <FieldGroup label="Biggest distraction">
-            <Input placeholder="Biggest distraction" value={survey.biggestDistraction} onChange={(e) => setSurvey({ ...survey, biggestDistraction: e.target.value })} />
-          </FieldGroup>
-          <FieldGroup label="What did you learn today?">
-            <Textarea placeholder="What did you learn today?" value={survey.learnedToday} onChange={(e) => setSurvey({ ...survey, learnedToday: e.target.value })} />
-          </FieldGroup>
-          <FieldGroup label="What will you improve tomorrow?">
-            <Textarea placeholder="What will you improve tomorrow?" value={survey.improveTomorrow} onChange={(e) => setSurvey({ ...survey, improveTomorrow: e.target.value })} />
-          </FieldGroup>
-          <Button onClick={async () => {
-            await createSurvey({ ...survey, date: new Date().toISOString() });
-            setSurvey({ productiveRating: 7, satisfactionRating: 7, biggestDistraction: "", learnedToday: "", improveTomorrow: "" });
-          }}>Save survey</Button>
 
-          <div className="space-y-3">
-            {surveys.map((entry) => (
-              <div key={entry._id} className="rounded-2xl border border-border p-4 text-sm">
-                <p className="mb-2 text-xs uppercase tracking-[0.18em] text-foreground/45">{formatDate(entry.date)}</p>
-                <p>Productive: {entry.productiveRating}/10</p>
-                <p>Satisfied: {entry.satisfactionRating}/10</p>
-                <p>Distraction: {entry.biggestDistraction}</p>
-                <p className="mt-2 text-foreground/70">Learned: {entry.learnedToday}</p>
-                <p className="text-foreground/70">Tomorrow: {entry.improveTomorrow}</p>
-              </div>
-            ))}
-          </div>
+          {history.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-4 text-sm text-foreground/60">
+              No journal entries yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {history.map((entry) => (
+                <article
+                  key={entry._id}
+                  className="rounded-2xl border border-border/70 p-4"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="font-semibold">{entry.title}</h3>
+                      <p className="text-xs text-foreground/55">
+                        {new Date(entry.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge>{entry.mood}</Badge>
+                  </div>
+                  <p className="mt-3 text-sm text-foreground/70">
+                    {entry.content}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => editEntry(entry._id)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteBlog(entry._id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </AppShell>

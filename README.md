@@ -1,36 +1,111 @@
 # GoalTrackr
 
-GoalTrackr is a full-stack productivity and life-planning web app for managing daily tasks, multi-level goals, job applications, journals, search, and profile tracking in one workspace.
+## 1. Project Overview
 
-Live app: https://goaltrackr-theta.vercel.app
+Project Name: GoalTrackr  
+Live URL: https://goaltrackr-theta.vercel.app  
+GitHub Repo: https://github.com/gauravssah/GoalTrackr  
+Author LinkedIn: https://www.linkedin.com/in/gauravssah
 
-## Overview
+Description (VERY IMPORTANT):  
+GoalTrackr is a full-stack productivity platform for managing tasks, goals, planning, and personal reflection in one place.  
+It helps users move from planning to execution through dedicated pages for daily work, long-term goals, and progress tracking.  
+The app includes secure authentication, profile management, and protected user-specific data handling.  
+It also supports career productivity through a job application tracker and writing habits through journal/reflection modules.  
+A global search workflow makes navigation across features easier and reduces context switching between tools.  
+The system is built as a monorepo using Next.js on the frontend and Express + MongoDB on the backend.
 
-GoalTrackr is built as a monorepo with:
+## 2. Table of Contents
 
-- `Frontend/` for the Next.js app
-- `Backend/` for the Express + MongoDB API
+- [Introduction](#3-introduction)
+- [Problem Statement](#4-problem-statement)
+- [Objectives](#5-objectives)
+- [Core Features](#6-core-features)
+- [System Architecture](#7-system-architecture)
+- [Database Schema Overview](#8-database-schema-overview)
+- [API Endpoints Overview](#9-api-endpoints-overview)
+- [Authentication Flow](#10-authentication-flow)
+- [Tech Stack](#11-tech-stack)
+- [Folder Structure](#12-folder-structure)
+- [Installation Steps](#13-installation-steps)
+- [Environment Variables](#14-environment-variables)
+- [Deployment Guide](#15-deployment-guide)
+- [Future Scope](#16-future-scope)
+- [Conclusion](#17-conclusion)
 
-The project includes:
+## 3. Introduction
 
-- authentication with login and signup
-- forgot-password flow with reset link support
-- task creation, editing, status updates, and today-task view
-- daily, weekly, monthly, and yearly planning
-- job application tracking
-- journal and end-of-day reflection
-- global search across app content
-- profile management with avatar support
-- analytics-oriented productivity dashboard sections
+GoalTrackr centralizes productivity workflows that are usually spread across multiple apps. It provides a single place to manage tasks, plan timelines, track goals, log reflections, and monitor career efforts. The application is designed for students, professionals, and self-improvement-focused users who want structure, consistency, and visibility into progress.
 
-## Live Links
+## 4. Problem Statement
 
-- Frontend: `https://goaltrackr-theta.vercel.app`
-- Backend health check: `https://goaltrackr-server.vercel.app/api/health`
+Most people use separate tools for tasks, notes, planning, and job tracking, which creates fragmentation and frequent context switching. This disconnect often leads to poor follow-through and limited long-term visibility. GoalTrackr solves this by combining planning, execution, and reflection into one unified, user-centric platform.
 
-## Tech Stack
+## 5. Objectives
 
-### Frontend
+- Provide one integrated workspace for personal productivity and growth.
+- Improve execution with task tracking and today-priority workflows.
+- Support short-term and long-term planning through structured modules.
+- Enable reflective habits with journaling and daily reflection tools.
+- Offer secure authentication and profile management for each user.
+
+## 6. Core Features
+
+- JWT-based user authentication (signup, login, protected routes).
+- Forgot-password and reset-password flow via email token.
+- Task creation, updates, filtering, and status-based organization.
+- Goal and planner support for daily to yearly productivity planning.
+- Job application tracking for career growth workflows.
+- Journal and reflection modules for habit building and self-review.
+- Dashboard insights and search support for fast data access.
+
+## 7. System Architecture
+
+GoalTrackr follows a client-server monorepo architecture:
+
+- Frontend: Next.js application (React + TypeScript) for UI and route handling.
+- Backend: Express.js API for auth, validation, and business logic.
+- Database: MongoDB with Mongoose models for domain entities.
+- Communication: Frontend consumes REST endpoints exposed by the backend.
+- Deployment: Frontend and backend are deployed separately.
+
+## 8. Database Schema Overview
+
+Key backend models include:
+
+- `user.model.js`: account identity, credentials, and profile fields.
+- `task.model.js`: tasks, due dates, status, and completion metadata.
+- `goal.model.js`: structured planning and measurable goal tracking.
+- `job-application.model.js`: company, role, stage, and timeline entries.
+- `blog.model.js`: journal/blog-style entries.
+- `reflection.model.js` and `daily-survey.model.js`: end-of-day reflection data.
+- `productivity-stats.model.js`: analytics-oriented aggregated productivity signals.
+
+## 9. API Endpoints Overview
+
+Representative endpoints:
+
+- `GET /api/health`: service health status.
+- `POST /api/auth/signup`: create new user account.
+- `POST /api/auth/login`: authenticate user and issue JWT.
+- `POST /api/auth/forgot-password`: generate reset token and send email.
+- `POST /api/auth/reset-password/:token`: update password using valid token.
+- `GET /api/auth/profile`: get authenticated user profile.
+- `PATCH /api/auth/profile`: update authenticated user profile.
+
+Domain-specific resource routes are managed through reusable resource controller and router layers.
+
+## 10. Authentication Flow
+
+1. User signs up or logs in through auth routes.
+2. Backend validates payload and issues JWT on success.
+3. Frontend stores token and includes it in protected API requests.
+4. Auth middleware verifies token before protected controller access.
+5. Password reset flow uses token generation, email delivery, and token validation.
+
+## 11. Tech Stack
+
+Frontend:
 
 - Next.js 14
 - React
@@ -39,110 +114,83 @@ The project includes:
 - Zustand
 - React Hook Form
 - Axios
-- Lucide React
 
-### Backend
+Backend:
 
 - Node.js
-- Express
+- Express.js
 - MongoDB
 - Mongoose
-- JWT authentication
-- Zod validation
+- JWT
+- Zod
 - Nodemailer
 
-## Main Features
+## 12. Folder Structure
 
-### Authentication
+Top-level:
 
-- user signup
-- user login
-- JWT-based protected routes
-- forgot password using email reset link
-- reset password with token validation
+- `Frontend/`: Next.js application.
+- `Backend/`: Express API service.
+- `README.md`: project documentation.
 
-### Task Management
+Frontend key folders:
 
-- create and edit tasks
-- today quick preview
-- dedicated today-tasks page
-- timer-related task fields
-- task status and completion handling
+- `app/`: route-based pages and layouts.
+- `components/`: reusable UI and feature components.
+- `lib/`: API integrations and utility functions.
+- `store/`: Zustand state management.
+- `types/`: shared TypeScript types.
 
-### Planner
+Backend key folders:
 
-- daily planning
-- weekly planning
-- monthly planning
-- yearly planning
+- `config/`: environment and database setup.
+- `controllers/`: request handling logic.
+- `middleware/`: auth, validation, and global error handling.
+- `models/`: Mongoose schema/model definitions.
+- `routes/`: API route declarations.
+- `services/`: business-level utilities and analytics logic.
+- `validators/`: request schemas and validation logic.
 
-### Career and Reflection
+## 13. Installation Steps
 
-- job application tracker
-- blog / journal entries
-- end-of-day survey
-
-### Productivity Experience
-
-- dashboard sections
-- search page
-- profile page
-- responsive sidebar and mobile navigation
-
-## Project Structure
-
-```text
-GoalTrackr/
-|- Frontend/
-|  |- app/
-|  |- components/
-|  |- lib/
-|  |- store/
-|  |- types/
-|  |- package.json
-|
-|- Backend/
-|  |- src/
-|  |  |- config/
-|  |  |- controllers/
-|  |  |- middleware/
-|  |  |- models/
-|  |  |- routes/
-|  |  |- utils/
-|  |  |- validators/
-|  |- package.json
-|
-|- README.md
-```
-
-## Local Setup
-
-### 1. Clone the repository
+1. Clone repository:
 
 ```bash
 git clone https://github.com/gauravssah/GoalTrackr.git
 cd GoalTrackr
 ```
 
-### 2. Install dependencies
+2. Install backend dependencies:
 
-Frontend:
+```bash
+cd Backend
+npm install
+```
+
+3. Install frontend dependencies:
+
+```bash
+cd ../Frontend
+npm install
+```
+
+4. Run backend (Terminal 1):
+
+```bash
+cd Backend
+npm run dev
+```
+
+5. Run frontend (Terminal 2):
 
 ```bash
 cd Frontend
-npm install
+npm run dev
 ```
 
-Backend:
+## 14. Environment Variables
 
-```bash
-cd ../Backend
-npm install
-```
-
-## Environment Variables
-
-### Backend `.env`
+Backend `.env`:
 
 ```env
 PORT=5000
@@ -157,95 +205,40 @@ SMTP_PASS=your-app-password
 SMTP_FROM=GoalTrackr <your-email@example.com>
 ```
 
-### Frontend `.env.local`
+Frontend `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=https://goaltrackr-server.vercel.app/api
 ```
 
-## Run Locally
+## 15. Deployment Guide
 
-### Backend
+Frontend deployment (Vercel):
 
-```bash
-cd Backend
-npm run dev
-```
+- Set root directory to `Frontend`.
+- Configure `NEXT_PUBLIC_API_URL`.
+- Deploy and verify route rendering and API integration.
 
-### Frontend
+Backend deployment (Vercel):
 
-```bash
-cd Frontend
-npm run dev
-```
+- Set root directory to `Backend`.
+- Configure `CLIENT_URL`, `JWT_SECRET`, `MONGO_URI`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`.
+- Verify health route: `https://goaltrackr-server.vercel.app/api/health`.
 
-Then open:
+Post-deployment checks:
 
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:5000`
+- Confirm database connectivity from deployed backend.
+- Confirm reset-password email delivery works.
+- Confirm frontend points to correct deployed backend URL.
 
-## Important Routes
+## 16. Future Scope
 
-### Frontend
+- Add reminders, notifications, and calendar sync support.
+- Introduce collaboration features (shared goals/tasks).
+- Expand analytics with richer productivity trend insights.
+- Provide AI-assisted planning and prioritization helpers.
+- Add mobile-first or native app support.
 
-- `/`
-- `/login`
-- `/signup`
-- `/forgot-password`
-- `/reset-password`
-- `/dashboard`
-- `/tasks`
-- `/tasks/create`
-- `/tasks/today`
-- `/planner`
-- `/jobs`
-- `/journal`
-- `/search`
-- `/profile`
+## 17. Conclusion
 
-### Backend
-
-- `GET /api/health`
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `POST /api/auth/forgot-password`
-- `POST /api/auth/reset-password/:token`
-- `GET /api/auth/profile`
-- `PATCH /api/auth/profile`
-
-## Deployment Notes
-
-### Frontend
-
-- deployed on Vercel
-- root directory: `Frontend`
-- required env:
-  - `NEXT_PUBLIC_API_URL`
-
-### Backend
-
-- deployed separately on Vercel
-- root directory: `Backend`
-- required env:
-  - `CLIENT_URL`
-  - `JWT_SECRET`
-  - `MONGO_URI`
-  - `SMTP_HOST`
-  - `SMTP_PORT`
-  - `SMTP_USER`
-  - `SMTP_PASS`
-  - `SMTP_FROM`
-
-## Notes
-
-- MongoDB Atlas network access must allow your deployed backend to connect.
-- The backend uses `MONGO_URI`, not `MONGODB_URI`.
-- The forgot-password feature requires working SMTP credentials.
-- If deploying fresh, make sure backend and frontend env variables are set before testing auth.
-
-## Author
-
-Gaurav Sah
-
-- GitHub: `https://github.com/gauravssah`
-- LinkedIn: `https://www.linkedin.com/in/gauravssah`
+GoalTrackr provides a scalable and practical foundation for unified productivity management. By combining planning, execution, and reflection workflows in one application, it reduces context switching and improves user consistency. Its monorepo architecture and modular structure make future expansion straightforward.

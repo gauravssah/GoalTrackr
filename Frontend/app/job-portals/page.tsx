@@ -52,9 +52,7 @@ export default function JobPortalsPage() {
         portal.portalUrl,
         portal.portalUserId,
         portal.description,
-      ]
-        .filter(Boolean)
-        .some((value) => value.toLowerCase().includes(q)),
+      ].some((value) => (value ?? "").toLowerCase().includes(q)),
     );
   }, [portals, search]);
 

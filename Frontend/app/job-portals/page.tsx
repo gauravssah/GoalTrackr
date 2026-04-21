@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Eye, EyeOff, Plus, Search } from "lucide-react";
+import { Check, Copy, Eye, EyeOff, Plus, Search } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { FieldGroup } from "@/components/ui/field-group";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/store/use-app-store";
+import { useToastStore } from "@/store/use-toast-store";
 import { JobPortal } from "@/types";
 
 type JobPortalDraft = Omit<JobPortal, "_id">;
@@ -27,11 +28,14 @@ export default function JobPortalsPage() {
   const createJobPortal = useAppStore((state) => state.createJobPortal);
   const updateJobPortal = useAppStore((state) => state.updateJobPortal);
   const deleteJobPortal = useAppStore((state) => state.deleteJobPortal);
+  const pushToast = useToastStore((state) => state.pushToast);
 
   const [form, setForm] = useState<JobPortalDraft>(emptyPortal);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showFormPassword, setShowFormPassword] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [visiblePasswords, setVisiblePasswords] = useState<
     Record<string, boolean>
   >({});
@@ -75,6 +79,7 @@ export default function JobPortalsPage() {
     }
 
     setForm(emptyPortal);
+    setShowFormPassword(false);
     setShowForm(false);
   }
 
@@ -87,12 +92,14 @@ export default function JobPortalsPage() {
       portalPassword: portal.portalPassword,
       description: portal.description || "",
     });
+    setShowFormPassword(false);
     setShowForm(true);
   }
 
   function handleCancel() {
     setForm(emptyPortal);
     setEditingId(null);
+    setShowFormPassword(false);
     setShowForm(false);
   }
 
@@ -100,10 +107,31 @@ export default function JobPortalsPage() {
     setVisiblePasswords((state) => ({ ...state, [id]: !state[id] }));
   }
 
+  async function handleCopy(value: string, key: string, label: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(key);
+      pushToast({
+        title: `${label} copied`,
+        description: "Copied to clipboard successfully.",
+        tone: "success",
+      });
+      window.setTimeout(() => {
+        setCopiedField((prev) => (prev === key ? null : prev));
+      }, 1500);
+    } catch {
+      pushToast({
+        title: "Copy failed",
+        description: "Please copy manually.",
+        tone: "error",
+      });
+    }
+  }
+
   return (
     <AppShell>
       <div className="space-y-5">
-        <Card className="space-y-4">
+        <Card className="space-y-4 border-border/70 bg-gradient-to-br from-card via-card to-primary/5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl font-semibold">Job portals vault</h1>
@@ -130,7 +158,7 @@ export default function JobPortalsPage() {
         </Card>
 
         {showForm ? (
-          <Card className="space-y-4">
+          <Card className="space-y-4 border-border/70 bg-card/90">
             <h2 className="text-xl font-semibold">
               {editingId ? "Update portal" : "Add new portal"}
             </h2>
@@ -164,14 +192,31 @@ export default function JobPortalsPage() {
                 />
               </FieldGroup>
               <FieldGroup label="Password *">
-                <Input
-                  type="password"
-                  placeholder="Your portal password"
-                  value={form.portalPassword}
-                  onChange={(e) =>
-                    setForm({ ...form, portalPassword: e.target.value })
-                  }
-                />
+                <div className="relative">
+                  <Input
+                    type={showFormPassword ? "text" : "password"}
+                    placeholder="Your portal password"
+                    className="pr-11"
+                    value={form.portalPassword}
+                    onChange={(e) =>
+                      setForm({ ...form, portalPassword: e.target.value })
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/60 transition hover:text-foreground"
+                    onClick={() => setShowFormPassword((prev) => !prev)}
+                    aria-label={
+                      showFormPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showFormPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </FieldGroup>
             </div>
             <FieldGroup label="Short description (optional)">
@@ -199,7 +244,10 @@ export default function JobPortalsPage() {
             const showPassword = Boolean(visiblePasswords[portal._id]);
 
             return (
-              <Card key={portal._id} className="space-y-4">
+              <Card
+                key={portal._id}
+                className="space-y-4 border-border/70 bg-gradient-to-br from-card via-card to-primary/5 shadow-soft"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-semibold">
@@ -217,31 +265,75 @@ export default function JobPortalsPage() {
                   <Badge>Saved portal</Badge>
                 </div>
 
-                <div className="space-y-2 rounded-xl border border-border/60 bg-card/60 p-3 text-sm">
-                  <p>
-                    <span className="font-semibold">User ID:</span>{" "}
-                    {portal.portalUserId}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">Password:</span>
-                    <span>
-                      {showPassword ? portal.portalPassword : "••••••••"}
-                    </span>
+                <div className="space-y-3 rounded-xl border border-border/60 bg-card/70 p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate">
+                      <span className="font-semibold">User ID:</span>{" "}
+                      <span className="text-foreground/90">
+                        {portal.portalUserId}
+                      </span>
+                    </p>
                     <button
                       type="button"
-                      className="inline-flex items-center text-foreground/70 transition hover:text-foreground"
-                      onClick={() => togglePasswordVisibility(portal._id)}
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-foreground/70 transition hover:bg-muted hover:text-foreground"
+                      onClick={() =>
+                        handleCopy(
+                          portal.portalUserId,
+                          `${portal._id}-id`,
+                          "User ID",
+                        )
                       }
+                      aria-label="Copy user ID"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                      {copiedField === `${portal._id}-id` ? (
+                        <Check className="h-4 w-4" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Copy className="h-4 w-4" />
                       )}
                     </button>
-                  </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="flex items-center gap-2">
+                      <span className="font-semibold">Password:</span>
+                      <span className="text-foreground/90">
+                        {showPassword ? portal.portalPassword : "••••••••"}
+                      </span>
+                      <button
+                        type="button"
+                        className="inline-flex items-center text-foreground/70 transition hover:text-foreground"
+                        onClick={() => togglePasswordVisibility(portal._id)}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </p>
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-foreground/70 transition hover:bg-muted hover:text-foreground"
+                      onClick={() =>
+                        handleCopy(
+                          portal.portalPassword,
+                          `${portal._id}-password`,
+                          "Password",
+                        )
+                      }
+                      aria-label="Copy password"
+                    >
+                      {copiedField === `${portal._id}-password` ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
                   {portal.description ? (
                     <p>
                       <span className="font-semibold">Description:</span>{" "}

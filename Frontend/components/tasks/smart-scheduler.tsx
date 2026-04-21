@@ -421,7 +421,7 @@ export function SmartScheduler() {
                 onChange={(event) =>
                   setForm({ ...form, title: event.target.value })
                 }
-                placeholder="DSA"
+                placeholder="Task name"
               />
             </FieldGroup>
 

@@ -2,20 +2,59 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Github, Heart, Linkedin } from "lucide-react";
+import {
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Github,
+  Heart,
+  Linkedin,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navigationItems } from "@/lib/navigation";
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
+
+  if (!isOpen) {
+    return (
+      <aside className="glass hidden w-16 flex-col items-center rounded-[28px] p-3 lg:flex">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Show left navigation"
+          title="Show left navigation"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card/80 text-foreground/70 transition hover:text-foreground"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </aside>
+    );
+  }
 
   return (
     <aside className="glass hidden w-72 flex-col rounded-[28px] p-6 lg:flex">
-      <div className="mb-8">
-        <p className="text-xs uppercase tracking-[0.32em] text-foreground/55">
-          GoalTrackr
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold">Plan with clarity.</h1>
+      <div className="mb-8 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.32em] text-foreground/55">
+            GoalTrackr
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold">Plan with clarity.</h1>
+        </div>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Hide left navigation"
+          title="Hide left navigation"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/60 bg-card/80 text-foreground/70 transition hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
       </div>
       <nav className="flex-1 space-y-2">
         {navigationItems.map((item) => {

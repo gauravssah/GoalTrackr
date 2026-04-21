@@ -73,6 +73,18 @@ const jobSchema = z.object({
   params: z.object({}).optional()
 });
 
+const jobPortalSchema = z.object({
+  body: z.object({
+    portalName: z.string().min(1),
+    portalUrl: z.string().url(),
+    portalUserId: z.string().min(1),
+    portalPassword: z.string().min(1),
+    description: z.string().optional()
+  }),
+  query: z.object({}).optional(),
+  params: z.object({}).optional()
+});
+
 const blogSchema = z.object({
   body: z.object({
     title: z.string().min(1),
@@ -112,6 +124,7 @@ module.exports = {
   taskSchema,
   goalSchema,
   jobSchema,
+  jobPortalSchema,
   blogSchema,
   surveySchema,
   reflectionSchema

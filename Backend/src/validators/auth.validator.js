@@ -21,6 +21,24 @@ const loginSchema = z.object({
   params: z.object({}).optional()
 });
 
+const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email()
+  }),
+  query: z.object({}).optional(),
+  params: z.object({}).optional()
+});
+
+const resetPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    otp: z.string().regex(/^\d{6}$/),
+    password: z.string().min(8)
+  }),
+  query: z.object({}).optional(),
+  params: z.object({}).optional()
+});
+
 const updateProfileSchema = z.object({
   body: z.object({
     name: z.string().min(2),
@@ -31,4 +49,10 @@ const updateProfileSchema = z.object({
   params: z.object({}).optional()
 });
 
-module.exports = { signupSchema, loginSchema, updateProfileSchema };
+module.exports = {
+  signupSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  updateProfileSchema
+};

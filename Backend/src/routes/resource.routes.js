@@ -2,7 +2,16 @@ const express = require("express");
 const controller = require("../controllers/resource.controller");
 const validate = require("../middleware/validate");
 const { protect } = require("../middleware/auth");
-const { objectIdParam, taskSchema, goalSchema, jobSchema, blogSchema, surveySchema, reflectionSchema } = require("../validators/resource.validator");
+const {
+    objectIdParam,
+    taskSchema,
+    goalSchema,
+    jobSchema,
+    jobPortalSchema,
+    blogSchema,
+    surveySchema,
+    reflectionSchema
+} = require("../validators/resource.validator");
 
 const router = express.Router();
 
@@ -22,6 +31,11 @@ router.get("/jobs", controller.listJobs);
 router.post("/jobs", validate(jobSchema), controller.createJob);
 router.patch("/jobs/:id", validate(objectIdParam), controller.updateJob);
 router.delete("/jobs/:id", validate(objectIdParam), controller.deleteJob);
+
+router.get("/job-portals", controller.listJobPortals);
+router.post("/job-portals", validate(jobPortalSchema), controller.createJobPortal);
+router.patch("/job-portals/:id", validate(objectIdParam), controller.updateJobPortal);
+router.delete("/job-portals/:id", validate(objectIdParam), controller.deleteJobPortal);
 
 router.get("/blogs", controller.listBlogs);
 router.post("/blogs", validate(blogSchema), controller.createBlog);

@@ -80,6 +80,15 @@ export interface JobApplication {
   timelineProgress: number;
 }
 
+export interface JobPortal {
+  _id: string;
+  portalName: string;
+  portalUrl: string;
+  portalUserId: string;
+  portalPassword: string;
+  description?: string;
+}
+
 export interface BlogEntry {
   _id: string;
   title: string;

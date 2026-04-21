@@ -8,6 +8,7 @@ import {
   Target,
   Trophy,
   UserCircle2,
+  Globe,
 } from "lucide-react";
 
 export const navigationItems = [
@@ -26,6 +27,12 @@ export const navigationItems = [
   },
   { href: "/goals", label: "Goals", shortLabel: "Goals", icon: Trophy },
   { href: "/jobs", label: "Jobs", shortLabel: "Jobs", icon: BriefcaseBusiness },
+  {
+    href: "/job-portals",
+    label: "Job Portals",
+    shortLabel: "Portals",
+    icon: Globe,
+  },
   {
     href: "/journal",
     label: "Journal",

@@ -2,6 +2,7 @@ const NodeCache = require("node-cache");
 const Task = require("../models/task.model");
 const Goal = require("../models/goal.model");
 const JobApplication = require("../models/job-application.model");
+const JobPortal = require("../models/job-portal.model");
 const Blog = require("../models/blog.model");
 const DailySurvey = require("../models/daily-survey.model");
 const ProductivityStats = require("../models/productivity-stats.model");
@@ -20,7 +21,9 @@ function clearUserResourceCache(resourceName, userId) {
   }
 }
 
-function createCrudController(Model, resourceName) {
+function createCrudController(Model, resourceName, options = {}) {
+  const { searchFields = ["title", "notes"] } = options;
+
   return {
     create: catchAsync(async (req, res) => {
       const doc = await Model.create({ ...req.body, user: req.user._id });
@@ -39,7 +42,11 @@ function createCrudController(Model, resourceName) {
       if (req.query.status) filter.status = req.query.status;
       if (req.query.priority) filter.priority = req.query.priority;
       if (req.query.tags) filter.tags = { $in: String(req.query.tags).split(",") };
-      if (req.query.q) filter.$or = [{ title: { $regex: req.query.q, $options: "i" } }, { notes: { $regex: req.query.q, $options: "i" } }];
+      if (req.query.q && searchFields.length) {
+        filter.$or = searchFields.map((field) => ({
+          [field]: { $regex: req.query.q, $options: "i" }
+        }));
+      }
 
       const docs = await buildQuery(Model.find(filter), req.query);
       const response = { success: true, count: docs.length, data: docs };
@@ -65,6 +72,9 @@ function createCrudController(Model, resourceName) {
 const taskCrud = createCrudController(Task, "tasks");
 const goalCrud = createCrudController(Goal, "goals");
 const jobCrud = createCrudController(JobApplication, "jobs");
+const jobPortalCrud = createCrudController(JobPortal, "job-portals", {
+  searchFields: ["portalName", "portalUrl", "portalUserId", "description"]
+});
 const blogCrud = createCrudController(Blog, "blogs");
 const surveyCrud = createCrudController(DailySurvey, "surveys");
 const reflectionCrud = createCrudController(Reflection, "reflections");
@@ -83,6 +93,11 @@ exports.createJob = jobCrud.create;
 exports.listJobs = jobCrud.list;
 exports.updateJob = jobCrud.update;
 exports.deleteJob = jobCrud.remove;
+
+exports.createJobPortal = jobPortalCrud.create;
+exports.listJobPortals = jobPortalCrud.list;
+exports.updateJobPortal = jobPortalCrud.update;
+exports.deleteJobPortal = jobPortalCrud.remove;
 
 exports.createBlog = blogCrud.create;
 exports.listBlogs = blogCrud.list;

@@ -1,12 +1,14 @@
 "use client";
 
 import { Bell, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./mode-toggle";
 import { useAppStore } from "@/store/use-app-store";
 
 export function Topbar() {
+  const router = useRouter();
   const user = useAppStore((state) => state.user);
   const logout = useAppStore((state) => state.logout);
 
@@ -27,7 +29,14 @@ export function Topbar() {
           />
         </div>
         <ModeToggle />
-        <Button variant="outline" size="sm" onClick={logout}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            logout();
+            router.push("/login");
+          }}
+        >
           Logout
         </Button>
         <Button variant="outline" size="sm">

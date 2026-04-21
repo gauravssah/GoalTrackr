@@ -8,6 +8,7 @@ import {
   DailySurvey,
   Goal,
   JobApplication,
+  JobPortal,
   Reflection,
   Task,
   User,
@@ -39,6 +40,7 @@ interface AppState {
   tasks: Task[];
   goals: Goal[];
   jobs: JobApplication[];
+  jobPortals: JobPortal[];
   blogs: BlogEntry[];
   surveys: DailySurvey[];
   reflections: Reflection[];
@@ -63,6 +65,9 @@ interface AppState {
   createJob: (payload: Partial<JobApplication>) => Promise<void>;
   updateJob: (id: string, payload: Partial<JobApplication>) => Promise<void>;
   deleteJob: (id: string) => Promise<void>;
+  createJobPortal: (payload: Partial<JobPortal>) => Promise<void>;
+  updateJobPortal: (id: string, payload: Partial<JobPortal>) => Promise<void>;
+  deleteJobPortal: (id: string) => Promise<void>;
   createBlog: (payload: Partial<BlogEntry>) => Promise<void>;
   updateBlog: (id: string, payload: Partial<BlogEntry>) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
@@ -117,6 +122,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   tasks: [],
   goals: [],
   jobs: [],
+  jobPortals: [],
   blogs: [],
   surveys: [],
   reflections: [],
@@ -168,6 +174,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         tasksRes,
         goalsRes,
         jobsRes,
+        jobPortalsRes,
         blogsRes,
         surveysRes,
         reflectionsRes,
@@ -175,6 +182,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         safeRequest(api.get("/tasks?limit=100")),
         safeRequest(api.get("/goals?limit=100")),
         safeRequest(api.get("/jobs?limit=100")),
+        safeRequest(api.get("/job-portals?limit=100")),
         safeRequest(api.get("/blogs?limit=100")),
         safeRequest(api.get("/surveys?limit=100")),
         safeRequest(api.get("/reflections?limit=100")),
@@ -184,6 +192,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         tasks: tasksRes.data,
         goals: goalsRes.data,
         jobs: jobsRes.data,
+        jobPortals: jobPortalsRes.data,
         blogs: blogsRes.data,
         surveys: surveysRes.data,
         reflections: reflectionsRes.data,
@@ -241,6 +250,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       tasks: [],
       goals: [],
       jobs: [],
+      jobPortals: [],
       blogs: [],
       surveys: [],
       reflections: [],
@@ -334,6 +344,37 @@ export const useAppStore = create<AppState>((set, get) => ({
     await api.delete(`/jobs/${id}`);
     set((state) => ({ jobs: state.jobs.filter((job) => job._id !== id) }));
     notify("Application deleted", "info", "Job application removed.");
+  },
+  createJobPortal: async (payload) => {
+    const response = await safeRequest(
+      api.post(
+        "/job-portals",
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
+    set((state) => ({
+      jobPortals: upsertById(state.jobPortals, response.data),
+    }));
+    notify("Portal saved", "success", "Job portal added to your list.");
+  },
+  updateJobPortal: async (id, payload) => {
+    const response = await safeRequest(
+      api.patch(
+        `/job-portals/${id}`,
+        cleanPayload(payload as Record<string, unknown>),
+      ),
+    );
+    set((state) => ({
+      jobPortals: upsertById(state.jobPortals, response.data),
+    }));
+    notify("Portal updated", "success", "Portal details updated.");
+  },
+  deleteJobPortal: async (id) => {
+    await api.delete(`/job-portals/${id}`);
+    set((state) => ({
+      jobPortals: state.jobPortals.filter((portal) => portal._id !== id),
+    }));
+    notify("Portal deleted", "info", "Portal removed from your list.");
   },
   createBlog: async (payload) => {
     const response = await safeRequest(

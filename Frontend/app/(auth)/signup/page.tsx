@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +14,7 @@ import { useAppStore } from "@/store/use-app-store";
 
 export default function SignupPage() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit } = useForm<{ name: string; email: string; password: string; bio: string }>();
   const signup = useAppStore((state) => state.signup);
   const loading = useAppStore((state) => state.loading);
@@ -36,7 +39,22 @@ export default function SignupPage() {
             <Input placeholder="Email" {...register("email")} />
           </FieldGroup>
           <FieldGroup label="Password">
-            <Input placeholder="Password" type="password" {...register("password")} />
+            <div className="relative">
+              <Input
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                className="pr-11"
+                {...register("password")}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/55 hover:text-foreground"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </FieldGroup>
           <FieldGroup label="Bio">
             <Textarea placeholder="Bio" {...register("bio")} />

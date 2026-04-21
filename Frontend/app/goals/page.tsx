@@ -102,8 +102,7 @@ export default function GoalsPage() {
               Weekly, monthly, and yearly goals in one place.
             </h1>
             <p className="max-w-3xl text-sm text-foreground/65">
-              Track progress, status, and satisfaction for long-term planning
-              without mixing it into the scheduler.
+              Track progress and status in one clear view.
             </p>
           </div>
         </Card>
@@ -115,7 +114,7 @@ export default function GoalsPage() {
                 {editingId ? "Edit goal" : "Create goal"}
               </h2>
               <p className="text-sm text-foreground/60">
-                Keep the form compact and update progress as you go.
+                Add a goal and update it anytime.
               </p>
             </div>
 
@@ -219,7 +218,7 @@ export default function GoalsPage() {
               <div>
                 <h2 className="text-lg font-semibold">Goal tracker panels</h2>
                 <p className="text-sm text-foreground/60">
-                  Filter by status and review progress by category.
+                  Filter goals by status and category.
                 </p>
               </div>
               <select
@@ -253,8 +252,7 @@ export default function GoalsPage() {
                           {category} goals
                         </h3>
                         <p className="text-xs text-foreground/55">
-                          Focused planning for the {category.toLowerCase()}{" "}
-                          view.
+                          Goals for your {category.toLowerCase()} plan.
                         </p>
                       </div>
                       <Badge>{categoryGoals.length}</Badge>
@@ -301,9 +299,15 @@ export default function GoalsPage() {
                                 <span>
                                   Due{" "}
                                   {goal.dueDate
-                                    ? new Date(
-                                        goal.dueDate,
-                                      ).toLocaleDateString()
+                                    ? new Date(goal.dueDate).toLocaleDateString(
+                                        "en-IN",
+                                        {
+                                          day: "2-digit",
+                                          month: "short",
+                                          year: "numeric",
+                                          timeZone: "Asia/Kolkata",
+                                        },
+                                      )
                                     : "No deadline"}
                                 </span>
                               </div>

@@ -64,8 +64,7 @@ export default function TaskHistoryPage() {
                 Completed, partial, and not completed task logs.
               </h1>
               <p className="mt-2 text-sm text-foreground/65">
-                Past due pending tasks are auto-classified as Not Completed in
-                this history.
+                Old pending tasks are marked as Not Completed.
               </p>
             </div>
             <Button asChild variant="outline">
@@ -172,10 +171,11 @@ function deriveCompletionStatus(task: Task, today: Date): CompletionStatus {
 }
 
 function formatDate(dateValue: string) {
-  return new Date(dateValue).toLocaleDateString(undefined, {
+  return new Date(dateValue).toLocaleDateString("en-IN", {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 }

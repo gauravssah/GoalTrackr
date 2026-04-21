@@ -1,6 +1,12 @@
 export type Priority = "High" | "Medium" | "Low";
 export type TaskStatus = "Pending" | "In Progress" | "Completed";
-export type JobStatus = "Applied" | "Interview" | "Rejected" | "Offer";
+export type JobStatus =
+  | "Not Applied"
+  | "Pending"
+  | "Applied"
+  | "Interview"
+  | "Rejected"
+  | "Offer";
 export type CompletionStatus =
   | "Completed"
   | "Partially Completed"

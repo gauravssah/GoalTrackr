@@ -7,7 +7,11 @@ const jobApplicationSchema = new mongoose.Schema(
     jobRole: { type: String, required: true },
     jobLink: String,
     applicationDate: { type: Date, required: true },
-    status: { type: String, enum: ["Applied", "Interview", "Rejected", "Offer"], default: "Applied" },
+    status: {
+      type: String,
+      enum: ["Not Applied", "Pending", "Applied", "Interview", "Rejected", "Offer"],
+      default: "Pending"
+    },
     followUpReminder: Date,
     notes: String,
     timelineProgress: { type: Number, min: 0, max: 100, default: 0 }

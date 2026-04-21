@@ -132,8 +132,7 @@ export default function TodayTasksPage() {
     if (completionStatus === "Pending") {
       pushToast({
         title: "Completion status required",
-        description:
-          "Mark Completion se pehle status ko Pending se change karna zaroori hai.",
+        description: "Change status from Pending before marking completion.",
         tone: "error",
       });
       return;
@@ -142,8 +141,7 @@ export default function TodayTasksPage() {
     if (satisfactionLevel <= 0) {
       pushToast({
         title: "Satisfaction rating required",
-        description:
-          "Completion submit karne ke liye 1 se 10 tak rating dena zaroori hai.",
+        description: "Add a satisfaction rating from 1 to 10.",
         tone: "error",
       });
       return;
@@ -198,7 +196,7 @@ export default function TodayTasksPage() {
                 All tasks created in today&apos;s scheduler.
               </h1>
               <p className="mt-2 text-sm text-foreground/65">
-                Yaha par sirf aaj ke scheduled slot-tasks visible hain.
+                Only today&apos;s scheduled tasks appear here.
               </p>
             </div>
             <Button asChild variant="outline">
@@ -209,7 +207,7 @@ export default function TodayTasksPage() {
 
         {todayTasks.length === 0 ? (
           <Card className="text-sm text-foreground/60">
-            Aaj ke liye abhi koi scheduled task nahi hai.
+            No tasks are scheduled for today.
           </Card>
         ) : (
           <div className="space-y-5">
@@ -222,7 +220,7 @@ export default function TodayTasksPage() {
               </div>
               {remainingTasks.length === 0 ? (
                 <Card className="text-sm text-foreground/60">
-                  Aaj ke saare tasks complete ho gaye.
+                  All tasks are complete for today.
                 </Card>
               ) : (
                 <div className="grid gap-4">
@@ -264,7 +262,7 @@ export default function TodayTasksPage() {
               </div>
               {completedTasks.length === 0 ? (
                 <Card className="text-sm text-foreground/60">
-                  Aaj abhi koi completed task nahi hai.
+                  No tasks are completed yet today.
                 </Card>
               ) : (
                 <div className="grid gap-4">
@@ -480,10 +478,11 @@ function formatSlot(minutes: number | undefined) {
 }
 
 function formatDate(dateValue: string) {
-  return new Date(dateValue).toLocaleDateString(undefined, {
+  return new Date(dateValue).toLocaleDateString("en-IN", {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 }

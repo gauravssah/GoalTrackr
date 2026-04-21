@@ -80,8 +80,7 @@ export default function ReflectionPage() {
               A fixed five-question self-review.
             </h1>
             <p className="max-w-3xl text-sm text-foreground/65">
-              Save one reflection per day, revisit it by date, and keep your
-              focus on daily improvement.
+              Save one reflection daily and review it anytime.
             </p>
           </div>
         </Card>
@@ -94,7 +93,7 @@ export default function ReflectionPage() {
                   Today&apos;s reflection
                 </h2>
                 <p className="text-sm text-foreground/60">
-                  Answer the same five questions every day.
+                  Answer these five questions each day.
                 </p>
               </div>
               <input
@@ -128,7 +127,7 @@ export default function ReflectionPage() {
             <div>
               <h2 className="text-lg font-semibold">Reflection history</h2>
               <p className="text-sm text-foreground/60">
-                Review past entries by date.
+                View your previous entries by date.
               </p>
             </div>
 
@@ -144,7 +143,14 @@ export default function ReflectionPage() {
                     className="rounded-2xl border border-border/70 p-4"
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <Badge>{new Date(entry.date).toLocaleDateString()}</Badge>
+                      <Badge>
+                        {new Date(entry.date).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          timeZone: "Asia/Kolkata",
+                        })}
+                      </Badge>
                       <div className="flex gap-2">
                         <Button
                           variant="outline"

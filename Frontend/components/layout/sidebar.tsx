@@ -86,8 +86,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <span className="text-secondary">Weekly review</span>
           </div>
           <p className="text-sm text-foreground/70">
-            Friday is a good day to close loops and update your yearly
-            trajectory.
+            Use Friday to review and reset your goals.
           </p>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">

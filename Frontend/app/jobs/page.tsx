@@ -16,10 +16,10 @@ const emptyJob: Omit<JobApplication, "_id"> = {
   jobRole: "",
   jobLink: "",
   applicationDate: "",
-  status: "Applied",
+  status: "Pending",
   followUpReminder: "",
   notes: "",
-  timelineProgress: 0
+  timelineProgress: 0,
 };
 
 export default function JobsPage() {
@@ -31,7 +31,10 @@ export default function JobsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   async function handleSubmit() {
-    const payload = { ...form, timelineProgress: Number(form.timelineProgress) };
+    const payload = {
+      ...form,
+      timelineProgress: Number(form.timelineProgress),
+    };
     if (editingId) {
       await updateJob(editingId, payload);
       setEditingId(null);
@@ -51,7 +54,7 @@ export default function JobsPage() {
       status: job.status,
       followUpReminder: job.followUpReminder?.slice(0, 10) || "",
       notes: job.notes || "",
-      timelineProgress: job.timelineProgress
+      timelineProgress: job.timelineProgress,
     });
   }
 
@@ -61,23 +64,57 @@ export default function JobsPage() {
         <Card className="space-y-4">
           <h1 className="text-2xl font-semibold">Job application tracker</h1>
           <FieldGroup label="Company name">
-            <Input placeholder="Company name" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
+            <Input
+              placeholder="Company name"
+              value={form.companyName}
+              onChange={(e) =>
+                setForm({ ...form, companyName: e.target.value })
+              }
+            />
           </FieldGroup>
           <FieldGroup label="Job role">
-            <Input placeholder="Job role" value={form.jobRole} onChange={(e) => setForm({ ...form, jobRole: e.target.value })} />
+            <Input
+              placeholder="Job role"
+              value={form.jobRole}
+              onChange={(e) => setForm({ ...form, jobRole: e.target.value })}
+            />
           </FieldGroup>
           <FieldGroup label="Job link">
-            <Input placeholder="Job link" value={form.jobLink} onChange={(e) => setForm({ ...form, jobLink: e.target.value })} />
+            <Input
+              placeholder="Job link"
+              value={form.jobLink}
+              onChange={(e) => setForm({ ...form, jobLink: e.target.value })}
+            />
           </FieldGroup>
           <div className="grid gap-3 md:grid-cols-2">
             <FieldGroup label="Application date">
-              <Input type="date" value={form.applicationDate} onChange={(e) => setForm({ ...form, applicationDate: e.target.value })} />
+              <Input
+                type="date"
+                value={form.applicationDate}
+                onChange={(e) =>
+                  setForm({ ...form, applicationDate: e.target.value })
+                }
+              />
             </FieldGroup>
             <FieldGroup label="Follow-up reminder">
-              <Input type="date" value={form.followUpReminder} onChange={(e) => setForm({ ...form, followUpReminder: e.target.value })} />
+              <Input
+                type="date"
+                value={form.followUpReminder}
+                onChange={(e) =>
+                  setForm({ ...form, followUpReminder: e.target.value })
+                }
+              />
             </FieldGroup>
             <FieldGroup label="Application status">
-              <select className="h-11 w-full rounded-xl border bg-card px-4" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as JobStatus })}>
+              <select
+                className="h-11 w-full rounded-xl border bg-card px-4"
+                value={form.status}
+                onChange={(e) =>
+                  setForm({ ...form, status: e.target.value as JobStatus })
+                }
+              >
+                <option>Not Applied</option>
+                <option>Pending</option>
                 <option>Applied</option>
                 <option>Interview</option>
                 <option>Rejected</option>
@@ -85,13 +122,26 @@ export default function JobsPage() {
               </select>
             </FieldGroup>
             <FieldGroup label="Timeline progress (%)">
-              <Input type="number" placeholder="Timeline %" value={form.timelineProgress} onChange={(e) => setForm({ ...form, timelineProgress: Number(e.target.value) })} />
+              <Input
+                type="number"
+                placeholder="Timeline %"
+                value={form.timelineProgress}
+                onChange={(e) =>
+                  setForm({ ...form, timelineProgress: Number(e.target.value) })
+                }
+              />
             </FieldGroup>
           </div>
           <FieldGroup label="Notes">
-            <Textarea placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <Textarea
+              placeholder="Notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
           </FieldGroup>
-          <Button onClick={handleSubmit}>{editingId ? "Update application" : "Save application"}</Button>
+          <Button onClick={handleSubmit}>
+            {editingId ? "Update application" : "Save application"}
+          </Button>
         </Card>
 
         <div className="space-y-4">
@@ -105,11 +155,37 @@ export default function JobsPage() {
                 <Badge>{job.status}</Badge>
               </div>
               <p className="text-sm text-foreground/70">{job.notes}</p>
-              <p className="mt-3 text-sm text-foreground/60">Progress: {job.timelineProgress}%</p>
+              <p className="mt-3 text-sm text-foreground/60">
+                Progress: {job.timelineProgress}%
+              </p>
               <div className="mt-4 flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => startEdit(job)}>Edit</Button>
-                <Button size="sm" onClick={() => updateJob(job._id, { timelineProgress: Math.min(job.timelineProgress + 10, 100) })}>Advance</Button>
-                <Button variant="outline" size="sm" onClick={() => deleteJob(job._id)}>Delete</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => startEdit(job)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    updateJob(job._id, {
+                      timelineProgress: Math.min(
+                        job.timelineProgress + 10,
+                        100,
+                      ),
+                    })
+                  }
+                >
+                  Advance
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => deleteJob(job._id)}
+                >
+                  Delete
+                </Button>
               </div>
             </Card>
           ))}

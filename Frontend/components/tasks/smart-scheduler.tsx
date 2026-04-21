@@ -166,8 +166,7 @@ export function SmartScheduler() {
     ) {
       pushToast({
         title: "Satisfaction score required",
-        description:
-          "Task completion submit karne ke liye 1-10 score dena zaroori hai.",
+        description: "Please add a score from 1 to 10 before saving.",
         tone: "error",
       });
       return;
@@ -238,7 +237,7 @@ export function SmartScheduler() {
     ) {
       pushToast({
         title: "Satisfaction score required",
-        description: "Completion update karne se pehle 1-10 score set karein.",
+        description: "Please add a score from 1 to 10 before updating.",
         tone: "error",
       });
       return;
@@ -266,19 +265,18 @@ export function SmartScheduler() {
   }
 
   return (
-    <div className="space-y-5">
-      <Card className="sticky top-4 z-20 border-primary/15 bg-gradient-to-br from-primary/10 via-card to-card backdrop-blur">
+    <div className="space-y-4 sm:space-y-5">
+      <Card className="z-20 border-primary/15 bg-gradient-to-br from-primary/10 via-card to-card backdrop-blur md:sticky md:top-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-foreground/50">
               Smart scheduler
             </p>
-            <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">
+            <h1 className="mt-2 text-2xl font-semibold leading-tight sm:text-3xl lg:text-4xl">
               A single timeline for every day.
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-foreground/65">
-              Use checkboxes, drag selection, and one-shot assignment to fill
-              continuous slot blocks without repeating yourself.
+              Select time slots and assign tasks quickly.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[420px]">
@@ -295,7 +293,13 @@ export function SmartScheduler() {
                 Clock
               </p>
               <p className="mt-1 text-sm font-medium">
-                {clock.toLocaleTimeString()}
+                {clock.toLocaleTimeString("en-IN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: true,
+                  timeZone: "Asia/Kolkata",
+                })}
               </p>
             </div>
             <div className="rounded-2xl border border-border/70 bg-card/75 p-3">
@@ -309,7 +313,7 @@ export function SmartScheduler() {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
-          <div className="w-full max-w-xs">
+          <div className="w-full sm:max-w-xs">
             <FieldGroup label="Date">
               <Input
                 type="date"
@@ -321,27 +325,87 @@ export function SmartScheduler() {
         </div>
       </Card>
 
-      <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <Card className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Daily slot grid</h2>
               <p className="text-sm text-foreground/60">
-                48 time blocks from 12:00 AM to 11:59 PM.
+                48 slots from 12:00 AM to 11:59 PM.
               </p>
             </div>
-            <Badge className="bg-muted text-foreground">
+            <Badge className="w-fit bg-muted text-foreground">
               {freeSlots} free / {SLOTS.length} total
             </Badge>
           </div>
 
-          <div className="overflow-hidden rounded-3xl border border-border/70">
-            <div className="grid grid-cols-[minmax(0,1fr)_100px_180px] border-b border-border/70 bg-muted/30 px-4 py-3 text-xs uppercase tracking-[0.2em] text-foreground/45">
+          <div className="overflow-hidden rounded-2xl border border-border/70 sm:rounded-3xl">
+            <div className="hidden grid-cols-[minmax(0,1fr)_92px_minmax(120px,1.4fr)] border-b border-border/70 bg-muted/30 px-4 py-3 text-xs uppercase tracking-[0.2em] text-foreground/45 md:grid">
               <span>Time</span>
               <span>Select</span>
               <span>Status</span>
             </div>
-            <div className="max-h-[68vh] overflow-auto">
+
+            <div className="max-h-[68vh] overflow-auto md:hidden">
+              {SLOTS.map((slot) => {
+                const bookedTask = slotTaskMap.get(slot.index) || null;
+                const selected = selectedSlots.includes(slot.index);
+                const booked = Boolean(bookedTask);
+
+                return (
+                  <button
+                    key={slot.index}
+                    type="button"
+                    onClick={() => {
+                      if (bookedTask) {
+                        setActiveTaskId(bookedTask._id);
+                        return;
+                      }
+                      toggleSlot(slot.index);
+                    }}
+                    className={cn(
+                      "w-full border-b border-border/50 px-4 py-3 text-left transition-colors",
+                      selected && "bg-primary/10",
+                      booked ? "cursor-pointer" : "cursor-cell",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold leading-tight">
+                          {slot.label}
+                        </p>
+                        <p className="mt-1 text-xs text-foreground/55">
+                          {formatClock(slot.startMinutes)} slot
+                        </p>
+                        {bookedTask ? (
+                          <p className="mt-2 truncate text-sm text-foreground/80">
+                            {bookedTask.title}
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="shrink-0">
+                        {booked ? (
+                          <Badge className="border border-border/70 bg-background text-foreground">
+                            Booked
+                          </Badge>
+                        ) : (
+                          <input
+                            aria-label={`Select slot ${slot.label}`}
+                            type="checkbox"
+                            checked={selected}
+                            onClick={(event) => event.stopPropagation()}
+                            onChange={() => toggleSlot(slot.index)}
+                            className="h-5 w-5 rounded border-border"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="hidden max-h-[68vh] overflow-auto md:block">
               {SLOTS.map((slot) => {
                 const bookedTask = slotTaskMap.get(slot.index) || null;
                 const selected = selectedSlots.includes(slot.index);
@@ -358,7 +422,7 @@ export function SmartScheduler() {
                       toggleSlot(slot.index);
                     }}
                     className={cn(
-                      "grid grid-cols-[minmax(0,1fr)_100px_180px] items-center gap-3 border-b border-border/50 px-4 py-3 text-left transition-all duration-150 hover:scale-[0.998] hover:bg-muted/40",
+                      "grid grid-cols-[minmax(0,1fr)_92px_minmax(120px,1.4fr)] items-center gap-3 border-b border-border/50 px-4 py-3 text-left transition-all duration-150 hover:scale-[0.998] hover:bg-muted/40",
                       selected && "bg-primary/10",
                       booked ? "cursor-pointer" : "cursor-cell",
                     )}
@@ -411,7 +475,7 @@ export function SmartScheduler() {
             </div>
             <p className="text-sm text-foreground/60">
               {selectedSlots.length
-                ? `${selectedSlots.length} slots selected. Continuous selections will be merged.`
+                ? `${selectedSlots.length} slots selected. We will merge continuous slots.`
                 : "Select slots to open the task composer."}
             </p>
 
@@ -486,12 +550,17 @@ export function SmartScheduler() {
 
             <div className="flex flex-wrap gap-2">
               <Button
+                className="flex-1 sm:flex-none"
                 onClick={saveSelection}
                 disabled={!selectedSlots.length || !form.title.trim()}
               >
                 {editingTaskId ? "Update task" : "Apply task to selected slots"}
               </Button>
-              <Button variant="outline" onClick={clearComposer}>
+              <Button
+                variant="outline"
+                className="flex-1 sm:flex-none"
+                onClick={clearComposer}
+              >
                 Clear
               </Button>
             </div>
@@ -591,8 +660,7 @@ export function SmartScheduler() {
               </div>
             ) : (
               <div className="rounded-3xl border border-dashed border-border p-4 text-sm text-foreground/60">
-                Click any booked slot to edit or delete the task, or update its
-                status and satisfaction score.
+                Select a booked slot to edit, delete, or update it.
               </div>
             )}
           </Card>
@@ -637,9 +705,10 @@ function isSameDay(dateValue: string | undefined, selectedDate: string) {
 }
 
 function formatFriendlyDate(dateValue: string) {
-  return new Date(dateValue).toLocaleDateString(undefined, {
+  return new Date(dateValue).toLocaleDateString("en-IN", {
     weekday: "short",
     month: "short",
     day: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 }

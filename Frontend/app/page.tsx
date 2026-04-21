@@ -27,8 +27,7 @@ export default function HomePage() {
       <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
           <p className="max-w-2xl text-lg text-foreground/70">
-            A production-ready life planning platform for tasks, goals,
-            journals, job applications, analytics, and end-of-day reflection.
+            Plan tasks, goals, journals, and job applications in one place.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
             <Link href="/signup" className="w-full sm:w-auto">
@@ -49,23 +48,21 @@ export default function HomePage() {
             <ChartNoAxesCombined className="mb-3 h-5 w-5 text-primary" />
             <h3 className="font-semibold">Visual analytics</h3>
             <p className="text-sm text-foreground/70">
-              Track progress with productivity charts, heatmaps, and scorecards.
+              View progress with simple charts and heatmaps.
             </p>
           </div>
           <div className="rounded-2xl bg-secondary/10 p-4">
             <Sparkles className="mb-3 h-5 w-5 text-secondary" />
             <h3 className="font-semibold">Multi-level planning</h3>
             <p className="text-sm text-foreground/70">
-              Organize daily tasks, weekly goals, monthly milestones, and yearly
-              objectives.
+              Plan daily work and long-term goals with ease.
             </p>
           </div>
           <div className="rounded-2xl bg-accent/10 p-4">
             <ShieldCheck className="mb-3 h-5 w-5 text-accent" />
             <h3 className="font-semibold">Secure by default</h3>
             <p className="text-sm text-foreground/70">
-              JWT auth, validation, rate limiting, and protected routes are
-              built in.
+              Secure login and protected data are built in.
             </p>
           </div>
         </Card>

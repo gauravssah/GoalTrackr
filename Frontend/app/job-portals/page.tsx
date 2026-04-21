@@ -136,8 +136,7 @@ export default function JobPortalsPage() {
             <div>
               <h1 className="text-2xl font-semibold">Job portals vault</h1>
               <p className="text-sm text-foreground/65">
-                Save every portal where you apply, with login details and quick
-                notes.
+                Save portal logins and notes in one place.
               </p>
             </div>
             <Button onClick={() => setShowForm((value) => !value)}>

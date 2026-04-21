@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field-group";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { formatDateTime } from "@/lib/utils";
 import { useAppStore } from "@/store/use-app-store";
 
 export default function JournalPage() {
@@ -80,8 +81,10 @@ export default function JournalPage() {
               Write, revisit, and refine your day.
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-foreground/65">
-              Every journal entry is date-stamped automatically and can be
-              edited or deleted later.
+              Each entry is saved with date and time automatically.
+            </p>
+            <p className="mt-1 text-xs text-foreground/55">
+              IST timestamp: {formatDateTime(new Date())}
             </p>
           </div>
 
@@ -166,7 +169,7 @@ export default function JournalPage() {
                     <div>
                       <h3 className="font-semibold">{entry.title}</h3>
                       <p className="text-xs text-foreground/55">
-                        {new Date(entry.date).toLocaleDateString()}
+                        {formatDateTime(entry.date)}
                       </p>
                     </div>
                     <Badge>{entry.mood}</Badge>

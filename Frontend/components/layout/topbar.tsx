@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Bell, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -7,20 +8,36 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./mode-toggle";
 import { MobileNav } from "./mobile-nav";
 import { useAppStore } from "@/store/use-app-store";
+import { formatTimeIndia, formatWeekdayDateIndia } from "@/lib/utils";
 
 export function Topbar() {
   const router = useRouter();
   const user = useAppStore((state) => state.user);
   const logout = useAppStore((state) => state.logout);
+  const [clock, setClock] = useState("");
+
+  useEffect(() => {
+    const tick = () => setClock(formatTimeIndia());
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
-    <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div>
+    <div className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="space-y-2">
         <div className="mb-2 lg:hidden">
           <MobileNav />
         </div>
-        <p className="text-sm text-foreground/60">Friday, 13 March 2026</p>
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <p className="text-sm text-foreground/60">
+            {formatWeekdayDateIndia()}
+          </p>
+          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-xs font-medium tracking-wide text-primary">
+            {clock || "--:--:--"}
+          </span>
+        </div>
+        <h2 className="pt-0.5 text-2xl font-semibold tracking-tight sm:text-3xl">
           Welcome back, {user?.name?.split(" ")[0] ?? "Scheduler"}.
         </h2>
       </div>

@@ -64,7 +64,7 @@ const jobSchema = z.object({
     jobRole: z.string().min(1),
     jobLink: z.string().url().optional(),
     applicationDate: z.string(),
-    status: z.enum(["Applied", "Interview", "Rejected", "Offer"]).optional(),
+    status: z.enum(["Not Applied", "Pending", "Applied", "Interview", "Rejected", "Offer"]).optional(),
     followUpReminder: z.string().optional(),
     notes: z.string().optional(),
     timelineProgress: z.number().min(0).max(100).optional()

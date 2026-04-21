@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
-import { MobileNav } from "./mobile-nav";
 import { useAppStore } from "@/store/use-app-store";
 
 const SIDEBAR_STORAGE_KEY = "goaltrackr_desktop_sidebar_open";
@@ -57,14 +56,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-[1600px] gap-6 p-4 lg:p-6">
+    <div className="mx-auto flex min-h-screen max-w-[1600px] gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
       <Sidebar
         isOpen={isDesktopSidebarOpen}
         onToggle={() => setIsDesktopSidebarOpen((prev) => !prev)}
       />
       <main className="w-full">
         <Topbar />
-        <MobileNav />
         {loading ? (
           <div className="mb-4 rounded-2xl border border-border/60 bg-card/70 px-4 py-3 text-sm text-foreground/65">
             Syncing your latest changes...

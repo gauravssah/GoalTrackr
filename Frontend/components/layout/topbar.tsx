@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./mode-toggle";
+import { MobileNav } from "./mobile-nav";
 import { useAppStore } from "@/store/use-app-store";
 
 export function Topbar() {
@@ -15,12 +16,15 @@ export function Topbar() {
   return (
     <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
+        <div className="mb-2 lg:hidden">
+          <MobileNav />
+        </div>
         <p className="text-sm text-foreground/60">Friday, 13 March 2026</p>
-        <h2 className="text-3xl font-semibold tracking-tight">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           Welcome back, {user?.name?.split(" ")[0] ?? "Scheduler"}.
         </h2>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-3.5 h-4 w-4 text-foreground/40" />
           <Input

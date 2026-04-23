@@ -73,7 +73,7 @@ const taskCrud = createCrudController(Task, "tasks");
 const goalCrud = createCrudController(Goal, "goals");
 const jobCrud = createCrudController(JobApplication, "jobs");
 const jobPortalCrud = createCrudController(JobPortal, "job-portals", {
-  searchFields: ["portalName", "portalUrl", "portalUserId", "description"]
+  searchFields: ["portalName", "portalUrl", "portalUserId", "description", "tags"]
 });
 const blogCrud = createCrudController(Blog, "blogs");
 const surveyCrud = createCrudController(DailySurvey, "surveys");

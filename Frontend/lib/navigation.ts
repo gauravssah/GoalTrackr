@@ -29,7 +29,7 @@ export const navigationItems = [
   { href: "/jobs", label: "Jobs", shortLabel: "Jobs", icon: BriefcaseBusiness },
   {
     href: "/job-portals",
-    label: "Job Portals",
+    label: "Portals",
     shortLabel: "Portals",
     icon: Globe,
   },

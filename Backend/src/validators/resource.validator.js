@@ -77,9 +77,10 @@ const jobPortalSchema = z.object({
   body: z.object({
     portalName: z.string().min(1),
     portalUrl: z.string().url(),
-    portalUserId: z.string().min(1),
-    portalPassword: z.string().min(1),
-    description: z.string().optional()
+    portalUserId: z.string().optional(),
+    portalPassword: z.string().optional(),
+    description: z.string().optional(),
+    tags: z.array(z.string().min(1)).optional()
   }),
   query: z.object({}).optional(),
   params: z.object({}).optional()

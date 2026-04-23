@@ -90,9 +90,10 @@ export interface JobPortal {
   _id: string;
   portalName: string;
   portalUrl: string;
-  portalUserId: string;
-  portalPassword: string;
+  portalUserId?: string;
+  portalPassword?: string;
   description?: string;
+  tags?: string[];
 }
 
 export interface BlogEntry {

@@ -21,7 +21,19 @@ const emptyPortal: JobPortalDraft = {
   portalUserId: "",
   portalPassword: "",
   description: "",
+  tags: [],
 };
+
+function parseTags(input: string) {
+  return Array.from(
+    new Set(
+      input
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    ),
+  );
+}
 
 export default function JobPortalsPage() {
   const portals = useAppStore((state) => state.jobPortals);
@@ -36,15 +48,13 @@ export default function JobPortalsPage() {
   const [showFormPassword, setShowFormPassword] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [tagsInput, setTagsInput] = useState("");
   const [visiblePasswords, setVisiblePasswords] = useState<
     Record<string, boolean>
   >({});
 
   const isValid =
-    form.portalName.trim().length > 0 &&
-    form.portalUrl.trim().length > 0 &&
-    form.portalUserId.trim().length > 0 &&
-    form.portalPassword.trim().length > 0;
+    form.portalName.trim().length > 0 && form.portalUrl.trim().length > 0;
 
   const filteredPortals = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -56,6 +66,7 @@ export default function JobPortalsPage() {
         portal.portalUrl,
         portal.portalUserId,
         portal.description,
+        portal.tags?.join(" "),
       ].some((value) => (value ?? "").toLowerCase().includes(q)),
     );
   }, [portals, search]);
@@ -66,9 +77,10 @@ export default function JobPortalsPage() {
     const payload = {
       portalName: form.portalName.trim(),
       portalUrl: form.portalUrl.trim(),
-      portalUserId: form.portalUserId.trim(),
-      portalPassword: form.portalPassword.trim(),
+      portalUserId: form.portalUserId?.trim() || undefined,
+      portalPassword: form.portalPassword?.trim() || undefined,
       description: form.description?.trim() || undefined,
+      tags: parseTags(tagsInput),
     };
 
     if (editingId) {
@@ -79,8 +91,23 @@ export default function JobPortalsPage() {
     }
 
     setForm(emptyPortal);
+    setTagsInput("");
     setShowFormPassword(false);
     setShowForm(false);
+  }
+
+  function handleAddWebsite() {
+    if (showForm) {
+      setShowForm(false);
+      return;
+    }
+
+    // Opening create form should always start with a fully empty state.
+    setForm(emptyPortal);
+    setTagsInput("");
+    setEditingId(null);
+    setShowFormPassword(false);
+    setShowForm(true);
   }
 
   function handleEdit(portal: JobPortal) {
@@ -88,16 +115,19 @@ export default function JobPortalsPage() {
     setForm({
       portalName: portal.portalName,
       portalUrl: portal.portalUrl,
-      portalUserId: portal.portalUserId,
-      portalPassword: portal.portalPassword,
+      portalUserId: portal.portalUserId || "",
+      portalPassword: "",
       description: portal.description || "",
+      tags: portal.tags || [],
     });
+    setTagsInput((portal.tags || []).join(", "));
     setShowFormPassword(false);
     setShowForm(true);
   }
 
   function handleCancel() {
     setForm(emptyPortal);
+    setTagsInput("");
     setEditingId(null);
     setShowFormPassword(false);
     setShowForm(false);
@@ -134,22 +164,27 @@ export default function JobPortalsPage() {
         <Card className="space-y-4 border-border/70 bg-gradient-to-br from-card via-card to-primary/5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold">Job portals vault</h1>
+              <h1 className="text-2xl font-semibold">Portals</h1>
               <p className="text-sm text-foreground/65">
-                Save portal logins and notes in one place.
+                Save job portals, social media, and any website in one place.
               </p>
             </div>
-            <Button onClick={() => setShowForm((value) => !value)}>
+            <Button onClick={handleAddWebsite}>
               <Plus className="mr-2 h-4 w-4" />
-              {showForm ? "Close form" : "Add portal"}
+              {showForm ? "Close form" : "Add website"}
             </Button>
           </div>
 
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/45" />
             <Input
+              id="portal-search"
+              name="portal-search"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               className="pl-9"
-              placeholder="Search by portal name, URL, user ID, or description"
+              placeholder="Search by website name, URL, user ID, tags, or description"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -159,19 +194,19 @@ export default function JobPortalsPage() {
         {showForm ? (
           <Card className="space-y-4 border-border/70 bg-card/90">
             <h2 className="text-xl font-semibold">
-              {editingId ? "Update portal" : "Add new portal"}
+              {editingId ? "Update website" : "Add new website"}
             </h2>
             <div className="grid gap-3 md:grid-cols-2">
-              <FieldGroup label="Portal name *">
+              <FieldGroup label="Website name *">
                 <Input
-                  placeholder="LinkedIn, Naukri, Indeed..."
+                  placeholder="LinkedIn, Naukri, Instagram, GitHub..."
                   value={form.portalName}
                   onChange={(e) =>
                     setForm({ ...form, portalName: e.target.value })
                   }
                 />
               </FieldGroup>
-              <FieldGroup label="Portal URL *">
+              <FieldGroup label="Website URL *">
                 <Input
                   type="url"
                   placeholder="https://example.com"
@@ -181,8 +216,12 @@ export default function JobPortalsPage() {
                   }
                 />
               </FieldGroup>
-              <FieldGroup label="User ID / Email *">
+              <FieldGroup label="User ID / Email (optional)">
                 <Input
+                  name="portal-user-id"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   placeholder="your-login-id"
                   value={form.portalUserId}
                   onChange={(e) =>
@@ -190,11 +229,17 @@ export default function JobPortalsPage() {
                   }
                 />
               </FieldGroup>
-              <FieldGroup label="Password *">
+              <FieldGroup label="Password (optional)">
                 <div className="relative">
                   <Input
                     type={showFormPassword ? "text" : "password"}
-                    placeholder="Your portal password"
+                    id="portal-password"
+                    name="portal-password"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    placeholder="Website password"
                     className="pr-11"
                     value={form.portalPassword}
                     onChange={(e) =>
@@ -218,6 +263,13 @@ export default function JobPortalsPage() {
                 </div>
               </FieldGroup>
             </div>
+            <FieldGroup label="Tags (comma separated)">
+              <Input
+                placeholder="job, social-media, learning, productivity"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+              />
+            </FieldGroup>
             <FieldGroup label="Short description (optional)">
               <Textarea
                 placeholder="Any notes about this portal"
@@ -229,7 +281,7 @@ export default function JobPortalsPage() {
             </FieldGroup>
             <div className="flex flex-wrap gap-2">
               <Button disabled={!isValid} onClick={handleSubmit}>
-                {editingId ? "Update portal" : "Save portal"}
+                {editingId ? "Update website" : "Save website"}
               </Button>
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
@@ -261,77 +313,94 @@ export default function JobPortalsPage() {
                       {portal.portalUrl}
                     </a>
                   </div>
-                  <Badge>Saved portal</Badge>
+                  <Badge>Saved website</Badge>
                 </div>
 
-                <div className="space-y-3 rounded-xl border border-border/60 bg-card/70 p-3 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="min-w-0 truncate">
-                      <span className="font-semibold">User ID:</span>{" "}
-                      <span className="text-foreground/90">
-                        {portal.portalUserId}
-                      </span>
-                    </p>
-                    <button
-                      type="button"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-foreground/70 transition hover:bg-muted hover:text-foreground"
-                      onClick={() =>
-                        handleCopy(
-                          portal.portalUserId,
-                          `${portal._id}-id`,
-                          "User ID",
-                        )
-                      }
-                      aria-label="Copy user ID"
-                    >
-                      {copiedField === `${portal._id}-id` ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
+                {portal.tags?.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {portal.tags.map((tag) => (
+                      <Badge
+                        key={`${portal._id}-${tag}`}
+                        className="bg-muted text-foreground/85"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
+                ) : null}
 
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="flex items-center gap-2">
-                      <span className="font-semibold">Password:</span>
-                      <span className="text-foreground/90">
-                        {showPassword ? portal.portalPassword : "••••••••"}
-                      </span>
+                <div className="space-y-3 rounded-xl border border-border/60 bg-card/70 p-3 text-sm">
+                  {portal.portalUserId ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="min-w-0 truncate">
+                        <span className="font-semibold">User ID:</span>{" "}
+                        <span className="text-foreground/90">
+                          {portal.portalUserId}
+                        </span>
+                      </p>
                       <button
                         type="button"
-                        className="inline-flex items-center text-foreground/70 transition hover:text-foreground"
-                        onClick={() => togglePasswordVisibility(portal._id)}
-                        aria-label={
-                          showPassword ? "Hide password" : "Show password"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-foreground/70 transition hover:bg-muted hover:text-foreground"
+                        onClick={() =>
+                          handleCopy(
+                            portal.portalUserId ?? "",
+                            `${portal._id}-id`,
+                            "User ID",
+                          )
                         }
+                        aria-label="Copy user ID"
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                        {copiedField === `${portal._id}-id` ? (
+                          <Check className="h-4 w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Copy className="h-4 w-4" />
                         )}
                       </button>
-                    </p>
-                    <button
-                      type="button"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-foreground/70 transition hover:bg-muted hover:text-foreground"
-                      onClick={() =>
-                        handleCopy(
-                          portal.portalPassword,
-                          `${portal._id}-password`,
-                          "Password",
-                        )
-                      }
-                      aria-label="Copy password"
-                    >
-                      {copiedField === `${portal._id}-password` ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+                    </div>
+                  ) : null}
+
+                  {portal.portalPassword ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="flex items-center gap-2">
+                        <span className="font-semibold">Password:</span>
+                        <span className="text-foreground/90">
+                          {showPassword ? portal.portalPassword : "••••••••"}
+                        </span>
+                        <button
+                          type="button"
+                          className="inline-flex items-center text-foreground/70 transition hover:text-foreground"
+                          onClick={() => togglePasswordVisibility(portal._id)}
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </p>
+                      <button
+                        type="button"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-foreground/70 transition hover:bg-muted hover:text-foreground"
+                        onClick={() =>
+                          handleCopy(
+                            portal.portalPassword ?? "",
+                            `${portal._id}-password`,
+                            "Password",
+                          )
+                        }
+                        aria-label="Copy password"
+                      >
+                        {copiedField === `${portal._id}-password` ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  ) : null}
 
                   {portal.description ? (
                     <p>
